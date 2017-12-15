@@ -151,6 +151,9 @@ class TweetCollector(object):
         res.raise_for_status()
         tweets = res.json()["statuses"]
 
+        # get next max id before insert_tweet changes the tweets
+        self.__next_max_id = self.get_min_id(tweets)
+
         # insert tweets into db
         insert_tasks = self.insert_tweets(tweets)
 
@@ -161,7 +164,6 @@ class TweetCollector(object):
         else:
             done = False
             # set the max_id param for the next api call (used by get_next_url)
-            self.__next_max_id = self.get_min_id(tweets)
 
         # get the rate limiting information from the header
         limit_remaining = int(res.headers["x-rate-limit-remaining"]) if \
