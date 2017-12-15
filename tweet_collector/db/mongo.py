@@ -17,7 +17,7 @@ RETWEET_COLLECTION_NAME = "retweets"
 # all tweet attrs to collect, includes required and optional attributes
 COLLECT_TWEET_ATTRS = REQUIRED_TWEET_ATTRS + \
                       ["coordinates", "place", "in_reply_to_id",
-                       "in_reply_to_status_id", "retweet_id", "quoted_id"]
+                       "in_reply_to_status_id", "quoted_id"]
 
 
 class MongoCollector(DbInterface):
@@ -159,7 +159,7 @@ class MongoCollector(DbInterface):
         self.insert_user(user_attrs, tweet_timestamp, tweet_attrs["id"])
 
         # set place id and insert into places collection
-        if "place" in tweet_attrs and "id" in tweet_attrs["place"]:
+        if "place" in tweet_attrs and tweet_attrs["place"]:
             tweet_attrs["place_id"] = tweet_attrs["place"]["id"]
             self.insert_place(tweet_attrs["place_id"], tweet_attrs["place"])
             del tweet_attrs["place"]
@@ -171,14 +171,14 @@ class MongoCollector(DbInterface):
 
     def insert_retweet(self, retweet, user):
         retweet["tweet_id"] = retweet["retweeted_status"]["id"]
-        if "place" in retweet and "id" in retweet["place"]:
+        if "place" in retweet and retweet["place"]:
             retweet["place_id"] = retweet["place"]["id"]
             self.insert_place(retweet["place_id"], retweet["place"])
 
         retweet_ts = created_at_to_ts(retweet["created_at"])
         retweet["timestamp"] = retweet_ts
 
-        self.insert_user(user, retweet["id"], retweet_ts)
+        self.insert_user(user, retweet_ts, retweet["id"])
 
         del_keys = [key for key in retweet if key not in RETWEET_ATTRS]
         for key in del_keys:

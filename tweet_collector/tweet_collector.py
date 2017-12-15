@@ -125,6 +125,8 @@ class TweetCollector(object):
                 limit_remaining, limit_reset, tasks, done = \
                     self.get_tweets(next_url, token)
 
+                self.block_for_futures(tasks)
+
                 if limit_remaining is None:
                     print("Did not receive limit_remaining from response")
                     self.token_reset_ts, self.token_limit_remaining = \
@@ -176,8 +178,10 @@ class TweetCollector(object):
         return [task.result() for task in completed]
 
     def block_for_futures(self, futures):
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(self.await_futures(futures))
+        if futures:
+            loop = asyncio.get_event_loop()
+            return loop.run_until_complete(self.await_futures(futures))
+        return []
 
     def insert_tweets(self, tweets):
         loop = asyncio.get_event_loop()
@@ -190,7 +194,7 @@ class TweetCollector(object):
     def insert_tweet(self, tweet):
         if "retweeted_status" in tweet:
             self.insert_tweet(tweet["retweeted_status"])
-            self.db.insert_retweet(tweet)
+            self.db.insert_retweet(tweet, tweet["user"])
 
         else:
             if "quoted_status" in tweet:

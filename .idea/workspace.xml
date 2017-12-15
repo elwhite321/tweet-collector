@@ -15,8 +15,8 @@
       <file leaf-file-name="DbInterface.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="232">
-              <caret line="17" column="11" lean-forward="false" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
+            <state relative-caret-position="210">
+              <caret line="14" column="8" lean-forward="false" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
               <folding>
                 <element signature="e#179#189#0" expanded="true" />
               </folding>
@@ -36,11 +36,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mongo.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mongo.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1403">
-              <caret line="166" column="12" lean-forward="false" selection-start-line="166" selection-start-column="12" selection-end-line="166" selection-end-column="12" />
+            <state relative-caret-position="786">
+              <caret line="180" column="42" lean-forward="false" selection-start-line="180" selection-start-column="42" selection-end-line="180" selection-end-column="42" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -48,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tweet_collector.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tweet_collector.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="639">
-              <caret line="187" column="20" lean-forward="true" selection-start-line="187" selection-start-column="20" selection-end-line="187" selection-end-column="20" />
+            <state relative-caret-position="709">
+              <caret line="183" column="17" lean-forward="false" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -172,15 +172,14 @@
         <option value="$PROJECT_DIR$/tweet_collector/tweet_collector.py" />
         <option value="$PROJECT_DIR$/tweet_collector/db/mongo.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/cli/cli.py" />
-        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/config.py" />
-        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py" />
+        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py" />
+        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="23" />
     <option name="y" value="23" />
     <option name="width" value="960" />
     <option name="height" value="1122" />
@@ -409,7 +408,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="23" y="23" width="960" height="1122" extended-state="0" />
+    <frame x="0" y="23" width="960" height="1122" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19389978" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -773,16 +772,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="17" column="11" lean-forward="false" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
-          <folding>
-            <element signature="e#179#189#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/config.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -791,22 +780,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py">
+    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1403">
-          <caret line="166" column="12" lean-forward="false" selection-start-line="166" selection-start-column="12" selection-end-line="166" selection-end-column="12" />
+        <state relative-caret-position="709">
+          <caret line="183" column="17" lean-forward="false" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
+    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="639">
-          <caret line="187" column="20" lean-forward="true" selection-start-line="187" selection-start-column="20" selection-end-line="187" selection-end-column="20" />
+        <state relative-caret-position="210">
+          <caret line="14" column="8" lean-forward="false" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#179#189#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="786">
+          <caret line="180" column="42" lean-forward="false" selection-start-line="180" selection-start-column="42" selection-end-line="180" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>

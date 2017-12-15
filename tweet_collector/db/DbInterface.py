@@ -12,7 +12,7 @@ class DbInterface(abc.ABC):
     def get_max_tweet_id(self):
         """Id of the newest tweet in the database. The collector will 
         collect tweets with ids greater then this one.
-
+        
         Returns:
             (int) max tweet id or 0 if no tweets have been entered yet
         """
