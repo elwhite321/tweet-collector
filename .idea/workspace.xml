@@ -36,10 +36,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mongo.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="mongo.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="786">
+            <state relative-caret-position="1666">
               <caret line="180" column="42" lean-forward="false" selection-start-line="180" selection-start-column="42" selection-end-line="180" selection-end-column="42" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -48,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tweet_collector.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="tweet_collector.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="709">
-              <caret line="183" column="17" lean-forward="false" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
+            <state relative-caret-position="223">
+              <caret line="126" column="0" lean-forward="true" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -173,9 +173,9 @@
         <option value="$PROJECT_DIR$/tweet_collector/db/mongo.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/cli/cli.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/config.py" />
-        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py" />
         <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py" />
+        <option value="$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py" />
       </list>
     </option>
   </component>
@@ -780,16 +780,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="709">
-          <caret line="183" column="17" lean-forward="false" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/DbInterface.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -802,10 +792,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/db/mongo.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="786">
+        <state relative-caret-position="1666">
           <caret line="180" column="42" lean-forward="false" selection-start-line="180" selection-start-column="42" selection-end-line="180" selection-end-column="42" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../tweet_collector/tweet_collector/tweet_collector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="126" column="0" lean-forward="true" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>

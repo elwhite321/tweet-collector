@@ -125,8 +125,6 @@ class TweetCollector(object):
                 limit_remaining, limit_reset, tasks, done = \
                     self.get_tweets(next_url, token)
 
-                self.block_for_futures(tasks)
-
                 if limit_remaining is None:
                     print("Did not receive limit_remaining from response")
                     self.token_reset_ts, self.token_limit_remaining = \
