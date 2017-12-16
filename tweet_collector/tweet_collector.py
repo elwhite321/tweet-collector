@@ -27,6 +27,8 @@ class TweetCollector(object):
 
         self.db = db_obj
 
+        self.current_tasks = []
+
         # parse input search params (passed through kwargs); restrict to
         # following
         used_search_params = ["geocode", "lang", "locale", "result_type"]
@@ -101,8 +103,9 @@ class TweetCollector(object):
             else:
                 token_idx = np.argmin(self.token_reset_ts)
                 token_reset_ts = self.token_reset_ts[token_idx]
-                sleep_for = token_reset_ts - datetime.now().timestamp() + 1
+                sleep_for = token_reset_ts - datetime.now().timestamp()
                 if sleep_for > 0:
+                    self.block_for_futures(self.current_tasks)
                     print(f"SLEEPING FOR TOKEN: {sleep_for/60} min")
                     time.sleep(sleep_for)
                     self.token_reset_ts, self.token_limit_remaining = \
@@ -111,7 +114,6 @@ class TweetCollector(object):
 
     def start_collector(self):
         """start collecting tweets"""
-        insert_tweet_tasks = []
         done = False
         for token, token_idx in self.get_next_token():
             print(f"SWITCHING TOKENS: {token_idx}")
@@ -133,7 +135,7 @@ class TweetCollector(object):
 
                 print(limit_remaining, self.tweets_collected)
 
-                insert_tweet_tasks += tasks
+                self.current_tasks += tasks
 
             self.token_reset_ts[token_idx] = limit_reset
             self.token_limit_remaining[token_idx] = limit_remaining
@@ -141,7 +143,7 @@ class TweetCollector(object):
                 break
 
         # handle insert_tweet_tasks
-        self.block_for_futures(insert_tweet_tasks)
+        self.block_for_futures(self.current_tasks)
 
     def get_tweets(self, url, token):
         """get the tweets in an async manner"""
@@ -152,7 +154,6 @@ class TweetCollector(object):
         tweets = res.json()["statuses"]
 
         # get next max id before insert_tweet changes the tweets
-        self.__next_max_id = self.get_min_id(tweets)
 
         # insert tweets into db
         insert_tasks = self.insert_tweets(tweets)
@@ -162,6 +163,7 @@ class TweetCollector(object):
         if len(tweets) == 0:
             done = True
         else:
+            self.__next_max_id = self.get_min_id(tweets)
             done = False
             # set the max_id param for the next api call (used by get_next_url)
 

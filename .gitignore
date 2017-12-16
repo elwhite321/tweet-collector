@@ -103,9 +103,11 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# PyCharm
-.idea/
 
+# PyCharm
+
+.idea/
+.idea
 
 # OSX
 
