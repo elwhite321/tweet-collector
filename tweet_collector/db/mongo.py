@@ -17,7 +17,8 @@ RETWEET_COLLECTION_NAME = "retweets"
 # all tweet attrs to collect, includes required and optional attributes
 COLLECT_TWEET_ATTRS = REQUIRED_TWEET_ATTRS + \
                       ["coordinates", "place", "in_reply_to_id",
-                       "in_reply_to_status_id", "quoted_id"]
+                       "in_reply_to_status_id", "quoted_id", "is_retweeted",
+                       "is_quoted"]
 
 
 class MongoCollector(DbInterface):
@@ -86,6 +87,30 @@ class MongoCollector(DbInterface):
                       .limit(1))
         return max_id[0]["id"] if max_id else 0
 
+    def get_last_tweet_id(self):
+
+        # get last tweet that wasn't retweeted or quoted
+        last_tweet_id = list(
+            self.tweets.find({"is_retweeted": {"$exists": False},
+                              "is_quoted": {"$exists": False}},
+                             {"_id": 0, "id": 1})
+                .sort("id", 1).limit(1)
+        )
+        last_tweet_id = last_tweet_id[0]["id"] if last_tweet_id else maxsize
+
+        # get the last retweet collected
+        last_retweet_id = list(
+            self.retweets.find({}, {"_id": 0, "id": 1})
+                .sort("id", 1).limit(1)
+        )
+        last_retweet_id = last_retweet_id[0]["id"] if last_retweet_id \
+            else maxsize
+
+        print(f"{last_tweet_id} {last_retweet_id}")
+
+        #return min of last retweet and tweet collected
+        return min([last_retweet_id, last_tweet_id])
+
     def get_min_tweet_id(self):
 
         max_id = list(self.tweets.find({}, {"_id": 0, "id": 1})
@@ -93,7 +118,7 @@ class MongoCollector(DbInterface):
                       .limit(1))
         return max_id[0]["id"] if max_id else maxsize
 
-    def insert_place(self, place_id, place_dict):
+    def insert_place(self, place_dict):
 
         # need to close bounding box for mongo geo index
         coords = []
@@ -161,7 +186,7 @@ class MongoCollector(DbInterface):
         # set place id and insert into places collection
         if "place" in tweet_attrs and tweet_attrs["place"]:
             tweet_attrs["place_id"] = tweet_attrs["place"]["id"]
-            self.insert_place(tweet_attrs["place_id"], tweet_attrs["place"])
+            self.insert_place(tweet_attrs["place"])
             del tweet_attrs["place"]
 
         try:
@@ -173,7 +198,7 @@ class MongoCollector(DbInterface):
         retweet["tweet_id"] = retweet["retweeted_status"]["id"]
         if "place" in retweet and retweet["place"]:
             retweet["place_id"] = retweet["place"]["id"]
-            self.insert_place(retweet["place_id"], retweet["place"])
+            self.insert_place(retweet["place"])
 
         retweet_ts = created_at_to_ts(retweet["created_at"])
         retweet["timestamp"] = retweet_ts

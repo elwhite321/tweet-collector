@@ -18,6 +18,11 @@ class DbInterface(abc.ABC):
         """
 
     @abc.abstractmethod
+    def get_last_tweet_id(self):
+        """Return the id of the last tweet collected. This needs to ignore 
+        the quoted and retweeted tweets collected."""
+
+    @abc.abstractmethod
     def insert_retweet(self, retweet, user):
         """insert a retweet, a reference to the original tweet"""
 

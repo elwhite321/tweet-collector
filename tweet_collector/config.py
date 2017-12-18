@@ -6,7 +6,7 @@ REQUIRED_TWEET_ATTRS = [
 ]
 
 RETWEET_ATTRS = [
-    "user_id", "tweet_id", "created_at", "place_id", "timestamp"
+    "id", "user_id", "tweet_id", "created_at", "place_id", "timestamp"
 ]
 
 # Required user attributes to collect

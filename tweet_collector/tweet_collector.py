@@ -1,6 +1,5 @@
 import os
-import json
-from sys import maxsize
+import sys
 import requests
 import asyncio
 import numpy as np
@@ -13,7 +12,8 @@ from tweet_collector.auth import DEFAULT_AUTH_FILE, get_auth_header, get_tokens
 
 
 class TweetCollector(object):
-    def __init__(self, db_obj, q, auth_file=DEFAULT_AUTH_FILE, **kwargs):
+    def __init__(self, db_obj, q, auth_file=DEFAULT_AUTH_FILE,
+                 recover=False, **kwargs):
 
         # get auth tokens from file set by auth cli
         self.tokens = get_tokens(auth_file=auth_file)
@@ -43,19 +43,21 @@ class TweetCollector(object):
         self.count = 100
 
         # set the next_max_id to collect the most recent tweets
-        self.__next_max_id = maxsize
+        self.__next_max_id = self.db.get_last_tweet_id() - 1 if recover \
+            else sys.maxsize
 
-        # get the since_id (max tweet id) from the database
-        # collect tweets with ids greater then this one
+        since_id = 0 if recover else self.db.get_max_tweet_id()
 
         # set some of the static api parameters we will use
+
+        print(f"Since id: {since_id}  Max id: {self.__next_max_id}")
 
         self.params = {
             **kwargs,
             "q": q,
             "count": self.count,
             "tweet_mode": "extended",
-            "since_id": self.db.get_max_tweet_id()
+            "since_id": since_id
         }
 
         self.tweets_collected = 0
@@ -195,12 +197,15 @@ class TweetCollector(object):
 
     def insert_tweet(self, tweet):
         if "retweeted_status" in tweet:
-            self.insert_tweet(tweet["retweeted_status"])
+            retweet = tweet["retweeted_status"]
+            retweet["is_retweeted"] = True
+            self.insert_tweet(retweet)
             self.db.insert_retweet(tweet, tweet["user"])
 
         else:
             if "quoted_status" in tweet:
                 quoted_tweet = tweet["quoted_status"]
+                quoted_tweet["is_quoted"] = True
                 tweet["quoted_id"] = quoted_tweet["id"]
                 self.insert_tweet(quoted_tweet)
 
