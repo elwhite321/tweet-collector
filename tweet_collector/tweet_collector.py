@@ -150,7 +150,17 @@ class TweetCollector(object):
     def get_tweets(self, url, token):
         """get the tweets in an async manner"""
         auth_header = get_auth_header(token)
-        res = requests.get(url, headers=auth_header)
+
+        # twitter servers return 503 code when overloaded
+        # need to retry code
+        while True:
+            res = requests.get(url, headers=auth_header)
+            if res.status_code == 503:
+                print("received 503 status code; retrying")
+                time.sleep(1)
+            else:
+                break
+
         # if the request fails, raise an error
         res.raise_for_status()
         tweets = res.json()["statuses"]

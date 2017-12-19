@@ -22,7 +22,7 @@ def collect_tweets(q, db_type, db_address, db_name, recover, daemon):
     if daemon:
         pid = os.fork()
         if pid == 0:
-            with open(f"{db_name}.log", 'w') as fp:
+            with open(f"{db_name}.log", 'a') as fp:
                 sys.stdout = fp
                 start_collector(q, db_type, db_address, db_name, recover)
             sys.stdout = sys.__stdout__
