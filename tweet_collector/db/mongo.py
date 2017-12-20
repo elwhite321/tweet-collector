@@ -1,5 +1,6 @@
 from sys import maxsize
 import numpy as np
+from datetime import datetime
 import pymongo
 from pymongo.errors import DuplicateKeyError
 from pymongo import MongoClient
@@ -58,7 +59,9 @@ class MongoCollector(DbInterface):
         ]
 
         meta_indexes = [
-            pymongo.IndexModel([("timestamp", pymongo.DESCENDING)])
+            pymongo.IndexModel([("timestamp", pymongo.DESCENDING)]),
+            pymongo.IndexModel([("next_max_id", pymongo.ASCENDING)]),
+            pymongo.IndexModel([("since_id", pymongo.ASCENDING)], unique=True)
         ]
 
         retweet_indexes = [
@@ -87,6 +90,29 @@ class MongoCollector(DbInterface):
                       .limit(1))
         return max_id[0]["id"] if max_id else 0
 
+    def save_collector_state(self, next_max_id, since_id, done):
+        try:
+            self.meta.insert({
+                "next_max_id": next_max_id,
+                "since_id": since_id,
+                "timestamp": datetime.now().timestamp(),
+                "done": done
+            })
+        except DuplicateKeyError:
+            self.meta.update(
+                {"since_id": since_id},
+                {
+                    "next_max_id": next_max_id,
+                    "since_id": since_id,
+                    "timestamp": datetime.now().timestamp(),
+                    "done": done
+                })
+
+    def load_collector_state(self):
+        return [[next_id["next_max_id"], next_id["since_id"]] for next_id in
+                list(self.meta.find({"done": False})
+                     .sort("since_id", pymongo.ASCENDING))]
+
     def get_last_tweet_id(self):
 
         # get last tweet that wasn't retweeted or quoted
@@ -108,7 +134,7 @@ class MongoCollector(DbInterface):
 
         print(f"{last_tweet_id} {last_retweet_id}")
 
-        #return min of last retweet and tweet collected
+        # return min of last retweet and tweet collected
         return min([last_retweet_id, last_tweet_id])
 
     def get_min_tweet_id(self):

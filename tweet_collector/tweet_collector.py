@@ -1,19 +1,22 @@
 import os
 import sys
-import requests
 import asyncio
+import logging
+import requests
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing
 from datetime import datetime
 import time
-
 from tweet_collector.auth import DEFAULT_AUTH_FILE, get_auth_header, get_tokens
+
+null_logger = logging.getLogger("null") \
+    .addHandler(logging.NullHandler())
 
 
 class TweetCollector(object):
     def __init__(self, db_obj, q, auth_file=DEFAULT_AUTH_FILE,
-                 recover=False, **kwargs):
+                 logger=null_logger, **kwargs):
 
         # get auth tokens from file set by auth cli
         self.tokens = get_tokens(auth_file=auth_file)
@@ -26,6 +29,7 @@ class TweetCollector(object):
             self.get_current_rate_limits()
 
         self.db = db_obj
+        self.logger = logger
 
         self.current_tasks = []
 
@@ -34,7 +38,9 @@ class TweetCollector(object):
         used_search_params = ["geocode", "lang", "locale", "result_type"]
         del_keys = [key for key in kwargs if key not in used_search_params]
         if del_keys:
-            print(f"Unused parameters passed to collector: {del_keys}")
+            self.logger.log(logging.INFO,
+                f"Unused parameters passed to collector:"
+                f" {del_keys}")
         for key in del_keys:
             del kwargs[key]
 
@@ -43,21 +49,19 @@ class TweetCollector(object):
         self.count = 100
 
         # set the next_max_id to collect the most recent tweets
-        self.__next_max_id = self.db.get_last_tweet_id() - 1 if recover \
-            else sys.maxsize
+        self.__collect_ids = sorted(self.db.load_collector_state())
+        self.__collect_ids.append([sys.maxsize, self.db.get_max_tweet_id()])
 
-        since_id = 0 if recover else self.db.get_max_tweet_id()
+        self.__next_max_id = self.__collect_ids[0][0]
+        self.since_id = self.__collect_ids[0][1]
 
         # set some of the static api parameters we will use
-
-        print(f"Since id: {since_id}  Max id: {self.__next_max_id}")
-
         self.params = {
             **kwargs,
             "q": q,
             "count": self.count,
             "tweet_mode": "extended",
-            "since_id": since_id
+            "since_id": self.since_id
         }
 
         self.tweets_collected = 0
@@ -79,14 +83,14 @@ class TweetCollector(object):
             token_reset_ts.append(rate_info["reset"])
             token_limit_remaining.append(rate_info["remaining"])
 
-        print(token_reset_ts, token_limit_remaining)
         return token_reset_ts, token_limit_remaining
 
     def get_next_url(self):
+        self.params["max_id"] = self.__next_max_id
+        self.params["since_id"] = self.since_id
         next_url = self.host
         for param, value in self.params.items():
             next_url += f"&{param}={value}"
-        next_url += f"&max_id={self.__next_max_id}"
         return next_url
 
     def get_min_id(self, tweets):
@@ -108,7 +112,7 @@ class TweetCollector(object):
                 sleep_for = token_reset_ts - datetime.now().timestamp()
                 if sleep_for > 0:
                     self.block_for_futures(self.current_tasks)
-                    print(f"SLEEPING FOR TOKEN: {sleep_for/60} min")
+                    self.logger.log(logging.INFO, f": {sleep_for/60} min")
                     time.sleep(sleep_for)
                     self.token_reset_ts, self.token_limit_remaining = \
                         self.get_current_rate_limits()
@@ -116,36 +120,62 @@ class TweetCollector(object):
 
     def start_collector(self):
         """start collecting tweets"""
+        self.logger.log(logging.INFO, "Starting collector")
         done = False
-        for token, token_idx in self.get_next_token():
-            print(f"SWITCHING TOKENS: {token_idx}")
-            # initialize rate limit info for this token
-            limit_remaining = self.token_limit_remaining[token_idx]
-            # loop while the token is not over the rate limit
-            while limit_remaining > 0 and not done:
-
-                # get the next url using __next_max_id set in the previous iter
-                next_url = self.get_next_url()
-                limit_remaining, limit_reset, tasks, done = \
-                    self.get_tweets(next_url, token)
-
-                if limit_remaining is None:
-                    print("Did not receive limit_remaining from response")
-                    self.token_reset_ts, self.token_limit_remaining = \
-                        self.get_current_rate_limits()
+        # loop through all gaps in tweets from meta table before collecting
+        # most recent tweets.
+        for id_range in self.__collect_ids:
+            self.__next_max_id, self.since_id = id_range
+            try:
+                for token, token_idx in self.get_next_token():
+                    # initialize rate limit info for this token
                     limit_remaining = self.token_limit_remaining[token_idx]
+                    self.logger.log(logging.INFO,
+                                    f"Switching Token: {token_idx} "
+                                    f"Limit Remaining: {limit_remaining} ")
 
-                print(limit_remaining, self.tweets_collected)
+                    # loop while the token is not over the rate limit
+                    while limit_remaining > 0 and not done:
+                        # get the next url using __next_max_id set in the
+                        # previous iter
+                        next_url = self.get_next_url()
+                        limit_remaining, limit_reset, tasks, done = \
+                            self.get_tweets(next_url, token)
 
-                self.current_tasks += tasks
+                        if limit_remaining is None:
+                            self.logger.log(logging.DEBUG,
+                                            "Received None limit_remaining. "
+                                            "Acquiring rate limit from api")
+                            self.token_reset_ts, self.token_limit_remaining = \
+                                self.get_current_rate_limits()
+                            limit_remaining = self. \
+                                token_limit_remaining[token_idx]
 
-            self.token_reset_ts[token_idx] = limit_reset
-            self.token_limit_remaining[token_idx] = limit_remaining
-            if done:
-                break
+                        self.current_tasks += tasks
 
-        # handle insert_tweet_tasks
-        self.block_for_futures(self.current_tasks)
+                    self.token_reset_ts[token_idx] = limit_reset
+                    self.token_limit_remaining[token_idx] = limit_remaining
+                    if done:
+                        break
+
+                # handle insert_tweet_tasks
+                self.block_for_futures(self.current_tasks, )
+            finally:
+                self.db.save_collector_state(
+                    self.__next_max_id,
+                    self.since_id,
+                    done)
+                self.logger.log(logging.INFO,
+                                f"Finished collecting for id range with "
+                                f"{self.__next_max_id} {self.since_id} "
+                                f"Collected {self.tweets_collected} tweets")
+
+                exc_type, exc_obj, trace = sys.exc_info()
+                if exc_obj:
+                    self.logger.log(logging.ERROR, exc_obj)
+                    raise(exc_obj)
+                else:
+                    assert done
 
     def get_tweets(self, url, token):
         """get the tweets in an async manner"""
@@ -156,7 +186,8 @@ class TweetCollector(object):
         while True:
             res = requests.get(url, headers=auth_header)
             if res.status_code == 503:
-                print("received 503 status code; retrying")
+                self.logger.log(logging.WARN,
+                                "received 503 status code; retrying")
                 time.sleep(1)
             else:
                 break

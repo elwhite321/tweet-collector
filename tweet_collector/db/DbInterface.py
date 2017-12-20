@@ -18,9 +18,15 @@ class DbInterface(abc.ABC):
         """
 
     @abc.abstractmethod
-    def get_last_tweet_id(self):
-        """Return the id of the last tweet collected. This needs to ignore 
-        the quoted and retweeted tweets collected."""
+    def save_collector_state(self, next_max_id, since_id, done):
+        """saves the state of the last collector run. the next max id and a 
+        boolean to indicate if the run completed are passed. The function 
+        should also record a timestamp."""
+
+    @abc.abstractmethod
+    def load_collector_state(self):
+        """return a list of lists [next_max_id, since_id] for collection runs 
+        that were not completed (done flag is false)"""
 
     @abc.abstractmethod
     def insert_retweet(self, retweet, user):
