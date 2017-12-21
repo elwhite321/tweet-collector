@@ -1,5 +1,6 @@
 import os
 import sys
+import signal
 import asyncio
 import logging
 import requests
@@ -17,6 +18,12 @@ null_logger = logging.getLogger("null") \
 class TweetCollector(object):
     def __init__(self, db_obj, q, auth_file=DEFAULT_AUTH_FILE,
                  logger=null_logger, **kwargs):
+
+        # set signal handlers to exit gracefully on process kill command
+        signal.signal(signal.SIGINT, self.handle_signal)
+        signal.signal(signal.SIGTERM, self.handle_signal)
+        signal.signal(signal.SIGQUIT, self.handle_signal)
+        signal.signal(signal.SIGTERM, self.handle_signal)
 
         # get auth tokens from file set by auth cli
         self.tokens = get_tokens(auth_file=auth_file)
@@ -39,8 +46,8 @@ class TweetCollector(object):
         del_keys = [key for key in kwargs if key not in used_search_params]
         if del_keys:
             self.logger.log(logging.INFO,
-                f"Unused parameters passed to collector:"
-                f" {del_keys}")
+                            f"Unused parameters passed to collector:"
+                            f" {del_keys}")
         for key in del_keys:
             del kwargs[key]
 
@@ -144,7 +151,7 @@ class TweetCollector(object):
 
                         if limit_remaining is None:
                             self.logger.log(logging.DEBUG,
-                                            "Received None limit_remaining. "
+                                            "Didn't Received limit_remaining. "
                                             "Acquiring rate limit from api")
                             self.token_reset_ts, self.token_limit_remaining = \
                                 self.get_current_rate_limits()
@@ -173,7 +180,7 @@ class TweetCollector(object):
                 exc_type, exc_obj, trace = sys.exc_info()
                 if exc_obj:
                     self.logger.log(logging.ERROR, exc_obj)
-                    raise(exc_obj)
+                    raise (exc_obj)
                 else:
                     assert done
 
@@ -252,3 +259,7 @@ class TweetCollector(object):
 
             self.db.insert_tweet(tweet, tweet["user"])
             self.tweets_collected += 1
+
+
+    def handle_signal(self, signal, frame):
+        raise InterruptedError(f"Terminated with signal {signal}")
