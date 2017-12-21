@@ -119,7 +119,7 @@ class TweetCollector(object):
                 sleep_for = token_reset_ts - datetime.now().timestamp()
                 if sleep_for > 0:
                     self.block_for_futures(self.current_tasks)
-                    self.logger.log(logging.INFO, f": {sleep_for/60} min")
+                    self.logger.info(f"sleeping for: {sleep_for/60} min")
                     time.sleep(sleep_for)
                     self.token_reset_ts, self.token_limit_remaining = \
                         self.get_current_rate_limits()
@@ -140,6 +140,8 @@ class TweetCollector(object):
                     self.logger.log(logging.INFO,
                                     f"Switching Token: {token_idx} "
                                     f"Limit Remaining: {limit_remaining} ")
+                    self.logger.info(f"Collected {self.tweets_collected} "
+                                     f"tweets")
 
                     # loop while the token is not over the rate limit
                     while limit_remaining > 0 and not done:
