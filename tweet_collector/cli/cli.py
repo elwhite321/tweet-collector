@@ -17,9 +17,8 @@ def cli():
 @click.argument("db-type")
 @click.argument("db-address")
 @click.argument("db-name")
-@click.option("--recover", is_flag=True)
 @click.option("--daemon", is_flag=True)
-def collect_tweets(q, db_type, db_address, db_name, recover, daemon):
+def collect_tweets(q, db_type, db_address, db_name, daemon):
     formatter = logging.Formatter("[ %(asctime)s ] \t\t %(message)s")
     fileHandle = logging.FileHandler(f"{db_name}.log")
     fileHandle.setFormatter(formatter)
@@ -31,8 +30,7 @@ def collect_tweets(q, db_type, db_address, db_name, recover, daemon):
         print("Forking daemon process")
         pid = os.fork()
         if pid == 0:
-            start_collector(q, db_type, db_address,
-                db_name, recover, logger)
+            start_collector(q, db_type, db_address, db_name, logger)
         else:
             print(f"Starting collector in daemon pid: {pid}")
             sys.exit(0)
@@ -43,7 +41,7 @@ def collect_tweets(q, db_type, db_address, db_name, recover, daemon):
 cli.add_command(auth)
 
 
-def start_collector(q, db_type, db_address, db_name, recover, logger):
+def start_collector(q, db_type, db_address, db_name, logger):
     db_obj = None
     if db_type == "mongo":
         db_obj = MongoCollector(db_address, db_name)
