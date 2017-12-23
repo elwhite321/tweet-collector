@@ -3,6 +3,7 @@ import sys
 import signal
 import asyncio
 import logging
+import json
 import requests
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor
@@ -128,11 +129,11 @@ class TweetCollector(object):
     def start_collector(self):
         """start collecting tweets"""
         self.logger.log(logging.INFO, "Starting collector")
-        done = False
         # loop through all gaps in tweets from meta table before collecting
         # most recent tweets.
         for id_range in self.__collect_ids:
             self.__next_max_id, self.since_id = id_range
+            num_done = 0
             try:
                 for token, token_idx in self.get_next_token():
                     # initialize rate limit info for this token
@@ -144,12 +145,14 @@ class TweetCollector(object):
                                      f"tweets")
 
                     # loop while the token is not over the rate limit
-                    while limit_remaining > 0 and not done:
+                    while limit_remaining > 0 and not num_done <= 3:
                         # get the next url using __next_max_id set in the
                         # previous iter
                         next_url = self.get_next_url()
                         limit_remaining, limit_reset, tasks, done = \
                             self.get_tweets(next_url, token)
+
+                        num_done = num_done + 1 if done else 0
 
                         if limit_remaining is None:
                             self.logger.log(logging.DEBUG,
@@ -164,11 +167,11 @@ class TweetCollector(object):
 
                     self.token_reset_ts[token_idx] = limit_reset
                     self.token_limit_remaining[token_idx] = limit_remaining
-                    if done:
+                    if num_done > 3:
                         break
 
                 # handle insert_tweet_tasks
-                self.block_for_futures(self.current_tasks, )
+                self.block_for_futures(self.current_tasks)
             finally:
                 self.db.save_collector_state(
                     self.__next_max_id,
@@ -176,7 +179,7 @@ class TweetCollector(object):
                     done)
                 self.logger.log(logging.INFO,
                                 f"Finished collecting for id range with "
-                                f"{self.__next_max_id} {self.since_id} "
+                                f"{id_range} "
                                 f"Collected {self.tweets_collected} tweets")
 
                 exc_type, exc_obj, trace = sys.exc_info()
@@ -213,6 +216,8 @@ class TweetCollector(object):
         # if the api returned less then the number of tweets requested,
         # it has no more tweets for us.
         if len(tweets) == 0:
+            self.logger.info(f"Received no tweets: "
+                             f"{json.dumps(res.json(), indent=4)}")
             done = True
         else:
             self.__next_max_id = self.get_min_id(tweets)
