@@ -197,7 +197,7 @@ class TweetCollector(object):
         # need to retry code
         while True:
             res = requests.get(url, headers=auth_header)
-            if res.status_code == 503:
+            if res.status_code in [503, 500]:
                 self.logger.log(logging.WARN,
                                 "received 503 status code; retrying")
                 time.sleep(1)
